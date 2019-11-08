@@ -8,34 +8,44 @@ class Graph:
     def __init__(self):
         self.vertices = {}
     def add_vertex(self, vertex):
-        """
-        Add a vertex to the graph.
-        """
-        pass  # TODO
+        self.vertices[vertex] = [];
+
     def add_edge(self, v1, v2):
-        """
-        Add a directed edge to the graph.
-        """
-        pass  # TODO
-    def bft(self, starting_vertex):
-        """
-        Print each vertex in breadth-first order
-        beginning from starting_vertex.
-        """
-        pass  # TODO
-    def dft(self, starting_vertex):
-        """
-        Print each vertex in depth-first order
-        beginning from starting_vertex.
-        """
-        pass  # TODO
-    def dft_recursive(self, starting_vertex):
-        """
-        Print each vertex in depth-first order
-        beginning from starting_vertex.
-        This should be done using recursion.
-        """
-        pass  # TODO
+        self.vertices[v1].append(v2);
+        #self.vertices[v2].append(v1);
+
+    def bft(self, starting_vertex, func = print): #change to preform any action on a vert
+        self.do_search(starting_vertex,0,func);
+
+    def do_search(self, starting_vertex, search_type,  func=print):
+        d = -1 if search_type == 1 else 0;
+        que = [starting_vertex]; 
+        visited = {};
+        q = que.pop(d);
+        ret = [];
+        while  q is not None:
+            if not q in visited:
+                visited[q] = True;
+                ret.append(func(q)); #do opperation
+                children = self.vertices[q]; #get the children
+                for c in children:
+                    que.append(c);
+            q = que.pop(d) if len(que) > 0 else None;
+        return ret;
+
+    def dft(self, starting_vertex,func=print):
+       self.do_search(starting_vertex,1,func);
+
+    def dft_recursive(self, starting_vertex, visited=None): #this is stupid
+        visited = {} if visited is None else visited;
+        if starting_vertex in visited:
+            return visited;
+        visited[starting_vertex] = True;
+        print(starting_vertex);
+        for c in self.vertices[starting_vertex]:
+            visited = self.dft_recursive(c, visited);
+        return visited;
+
     def bfs(self, starting_vertex, destination_vertex):
         """
         Return a list containing the shortest path from
@@ -43,6 +53,7 @@ class Graph:
         breath-first order.
         """
         pass  # TODO
+
     def dfs(self, starting_vertex, destination_vertex):
         """
         Return a list containing a path from
@@ -84,7 +95,7 @@ if __name__ == '__main__':
 
     '''
     Valid DFT paths:
-        1, 2, 3, 5, 4, 6, 7
+        1, 2, 3, 5, 4, 6, 7 *
         1, 2, 3, 5, 4, 7, 6
         1, 2, 4, 7, 6, 3, 5
         1, 2, 4, 6, 3, 5, 7
@@ -103,7 +114,7 @@ if __name__ == '__main__':
         1, 2, 4, 3, 5, 7, 6
         1, 2, 4, 3, 6, 7, 5
         1, 2, 4, 3, 6, 5, 7
-        1, 2, 4, 3, 7, 6, 5
+        1, 2, 4, 3, 7, 6, 5 *
         1, 2, 4, 3, 7, 5, 6
     '''
     graph.bft(1)
@@ -112,9 +123,11 @@ if __name__ == '__main__':
     Valid DFT recursive paths:
         1, 2, 3, 5, 4, 6, 7
         1, 2, 3, 5, 4, 7, 6
-        1, 2, 4, 7, 6, 3, 5
+        1, 2, 4, 7, 6, 3, 5 *
         1, 2, 4, 6, 3, 5, 7
     '''
+    graph.dft_recursive(1)
+    print("break");
     graph.dft_recursive(1)
 
     '''

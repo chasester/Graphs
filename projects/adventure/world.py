@@ -34,7 +34,7 @@ class World:
                 self.rooms[roomID].connectRooms('w', self.rooms[roomGraph[roomID][1]['w']])
         self.startingRoom = self.rooms[0]
 
-    def printRooms(self):
+    def printRooms(self, curentid=-1):
         rotatedRoomGrid = []
         for i in range(0, len(self.roomGrid)):
             rotatedRoomGrid.append([None] * len(self.roomGrid))
@@ -66,7 +66,9 @@ class World:
                     str += "-"
                 else:
                     str += " "
-                if room is not None:
+                if room is not None and  room.id == curentid:
+                    str+= "***";
+                elif room is not None:
                     str += f"{room.id}".zfill(3)
                 else:
                     str += "   "

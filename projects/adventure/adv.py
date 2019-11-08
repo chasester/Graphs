@@ -1,6 +1,13 @@
+import os
 from room import Room
 from player import Player
 from world import World
+import time;
+def clear_console():
+    if os.name == "nt":
+        os.system('cls')  # For Windows
+    else:
+        os.system('clear')  # For Linux/OS X
 
 import random
 
@@ -24,16 +31,83 @@ player = Player("Name", world.startingRoom)
 # Fill this out
 traversalPath = []
 
+#the plan is to move player throw the rooms in a given direction (say n)
+#ever room that is visited is added to the visited array, every room visited is added to the
+#traveral path. 
+#the player will continue in this direction keeping a que tuple where 0 is the direction to travel back to this room
+# and 1 is an array of other directions it could have traveled (so if you are going N then S would be the way back)
+#when player hits a room with no connections (ie a dead end) it will travel backwards
+#till it hits a room where a cached direction is stored (it will check to see if that room has been visited, if not it will
+# continue that way till the text dead end)
+#when a dead end occurs we will walk back until we find a connection in element 1 of the tuple in the que, meaning there was a new way to
+#go that we have not travel. We will varify we havent gone to the room connected in this driection, then we will continue in that direction untill the next
+#dead end.
+def depth_first_travel():
+    directiontoNum = {"n": 0, "s": 1, "e": 2, "w": 3 }
+    directions = ["n","s","e","w"]
+    oppdirections = {"s": "n","n": "s","w": "e","e": "w"}
 
+    visited_rooms = set();
+    quepath = [];
+    direction = "e";
+    curroom = player.currentRoom;
+    
+    exits = curroom.getExits();
+    e = []
+    for i in exits:
+        if direction == i:
+            continue;
+        e.append(i);
+    quepath.append((None, e));
+    visited_rooms.add(curroom.id)
+    while len(quepath) > 0:
+        if(direction is not None): #if we have a direction just move in that direction
+            if( curroom.getRoomInDirection(direction) is None): #if there is no room here then we need to set this to none
+                direction = None;
+                curroom.id
+                continue; #break this cycle we will handle this next cycle
+            traversalPath.append(direction)
+            player.travel(direction); #move in the direction we have been since it is not blocked
+            curroom = player.currentRoom;
+            visited_rooms.add(curroom.id)
+            #now lets add the new room into the collection path
+            exits = curroom.getExits();
+            e = []
+            for i in exits:
+                if i == direction or i == oppdirections[direction]: #if the path is in the direction im going or the direction i came from dont add it (only add tangent directions)
+                    continue;
+                r = curroom.getRoomInDirection(i); #now lets check if we been there already
+                if(r is None or r.id in visited_rooms): #if there is no room in that direction or we have already been in that room lets not go that way
+                    continue 
+                e.append(i);
+            quepath.append((oppdirections[direction], e));
+        else: #we ran into a dead end so now we need to look at other paths we could go
+            try:
+                q = quepath[-1];  
+                direction = q[1].pop(); #will error here if not len
+            except IndexError:
+                direction = None;
+                traversalPath.append(q[0])
+                player.travel(q[0]);
+                curroom = player.currentRoom;
+                visited_rooms.add(curroom.id)
+                quepath.pop(-1);
 
 # TRAVERSAL TEST
-visited_rooms = set()
-player.currentRoom = world.startingRoom
+
+
+depth_first_travel();
+visited_rooms = set();
 visited_rooms.add(player.currentRoom)
 
 for move in traversalPath:
+    #time.sleep(1/20);
+
     player.travel(move)
     visited_rooms.add(player.currentRoom)
+    #clear_console();
+    #time.sleep(0.002);
+    #world.printRooms(player.currentRoom.id);
 
 if len(visited_rooms) == len(roomGraph):
     print(f"TESTS PASSED: {len(traversalPath)} moves, {len(visited_rooms)} rooms visited")
@@ -43,13 +117,19 @@ else:
 
 
 
-#######
-# UNCOMMENT TO WALK AROUND
-#######
-# player.currentRoom.printRoomDescription(player)
-# while True:
-#     cmds = input("-> ").lower().split(" ")
-#     if cmds[0] in ["n", "s", "e", "w"]:
-#         player.travel(cmds[0], True)
-#     else:
-#         print("I did not understand that command.")
+####### m
+# UNCOMMENT TO WALK AROUND m
+####### m
+player.currentRoom.printRoomDescription(player)
+
+""" while True:
+    clear_console();
+    world.printRooms(player.currentRoom.id);
+    cmds = input("-> ").lower().split(" ")
+    if cmds[0] in ["n", "s", "e", "w"]:
+        player.travel(cmds[0], True)
+    else:
+        print("I did not understand that command.")
+ """
+#clear_console();
+#world.printRooms(player.currentRoom.id);
